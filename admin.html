@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,13 +8,17 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="admin.css?v=2">
 </head>
+
 <body>
-    
+
     <!-- Login Screen -->
     <div id="login-overlay" class="login-overlay active">
         <div class="login-box">
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <img src="assets/logo.png" alt="Los Dogguies" style="height: 70px;">
+            </div>
             <h2>Acceso Administrador</h2>
             <form id="login-form">
                 <div class="form-group">
@@ -29,7 +34,7 @@
             </form>
         </div>
     </div>
-    
+
     <!-- Sidebar -->
     <aside class="sidebar">
         <div class="logo-container">
@@ -52,7 +57,7 @@
 
     <!-- Main Content -->
     <main class="main-content">
-        
+
         <!-- Pedidos Section -->
         <section id="pedidos-section" class="content-section active">
             <div class="header-section">
@@ -66,7 +71,7 @@
                     <span id="store-status-text">Abierto</span>
                 </div>
             </div>
-            
+
             <div class="pedidos-grid" id="pedidos-container">
                 <!-- Se inyectarán los pedidos por JS -->
             </div>
@@ -78,7 +83,7 @@
                 <h2>Gestión del Menú</h2>
                 <button class="btn-primary" id="btn-nuevo-producto">+ Añadir Producto</button>
             </div>
-            
+
             <div class="menu-table-container">
                 <table class="menu-table">
                     <thead>
@@ -103,7 +108,7 @@
             <div class="header-section">
                 <h2>Configuración de la Tienda</h2>
             </div>
-            
+
             <div class="config-card">
                 <h3>Horarios de Atención</h3>
                 <form id="config-form">
@@ -180,4 +185,5 @@
     <!-- Cargar lógica del admin como módulo -->
     <script type="module" src="admin.js"></script>
 </body>
+
 </html>

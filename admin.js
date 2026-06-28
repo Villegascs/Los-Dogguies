@@ -1,7 +1,7 @@
-import { 
-    addProducto, updateProducto, deleteProducto, 
-    addCategoria, updateEstadoPedido, updateConfiguracion, 
-    getState, initDBListeners 
+import {
+    addProducto, updateProducto, deleteProducto,
+    addCategoria, updateEstadoPedido, updateConfiguracion,
+    getState, initDBListeners
 } from './db.js';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
         item.addEventListener('click', () => {
             navItems.forEach(n => n.classList.remove('active'));
             sections.forEach(s => s.classList.remove('active'));
-            
+
             item.classList.add('active');
             document.getElementById(item.dataset.target).classList.add('active');
         });
@@ -23,18 +23,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Estado de la Tienda ---
     const storeToggle = document.getElementById('store-toggle');
     const storeStatusText = document.getElementById('store-status-text');
-    
+
     function loadStoreConfig() {
         const config = getState().configuracion;
         storeToggle.checked = config.abierto;
         updateStoreStatusText(config.abierto);
-        
+
         document.getElementById('hora-apertura').value = config.horarioApertura;
         document.getElementById('hora-cierre').value = config.horarioCierre;
     }
 
     function updateStoreStatusText(abierto) {
-        if(abierto) {
+        if (abierto) {
             storeStatusText.innerText = "Abierto";
             storeStatusText.classList.remove('cerrado');
         } else {
@@ -62,12 +62,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const pedidos = getState().pedidos;
         const container = document.getElementById('pedidos-container');
         const badge = document.getElementById('badge-nuevos');
-        
+
         container.innerHTML = '';
-        
+
         const nuevos = pedidos.filter(p => p.estado === 'Nuevo').length;
         badge.innerText = nuevos;
-        
+
         if (pedidos.length === 0) {
             container.innerHTML = '<p>No hay pedidos aún.</p>';
             return;
@@ -76,10 +76,10 @@ document.addEventListener('DOMContentLoaded', () => {
         pedidos.forEach(p => {
             const date = new Date(p.timestamp).toLocaleString();
             let itemsHtml = p.items.map(i => `<li><span>${i.quantity}x ${i.name}</span> <span>$${(i.price * i.quantity).toFixed(2)}</span></li>`).join('');
-            
+
             // Datos del cliente y pago
             let pagoHtml = `<p><strong>Método:</strong> ${p.metodo}</p>`;
-            if(p.metodo === 'efectivo') {
+            if (p.metodo === 'efectivo') {
                 pagoHtml += `<p><strong>Denominación:</strong> ${p.denominacion}</p>`;
             } else if (p.metodo === 'pago-movil') {
                 pagoHtml += `<p><strong>Ref:</strong> ${p.referencia} | <strong>Banco:</strong> ${p.banco}</p>`;
@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    window.cambiarEstadoPedido = async function(id, estado) {
+    window.cambiarEstadoPedido = async function (id, estado) {
         await updateEstadoPedido(id, estado);
     };
 
@@ -127,10 +127,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const catList = document.getElementById('categorias-list');
         const selectProd = document.getElementById('prod-categoria');
         const categorias = getState().categorias;
-        
+
         catList.innerHTML = '';
         selectProd.innerHTML = '';
-        
+
         categorias.forEach(cat => {
             catList.innerHTML += `<span class="cat-tag">${cat.nombre}</span>`;
             selectProd.innerHTML += `<option value="${cat.id}">${cat.nombre}</option>`;
@@ -148,9 +148,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const tbody = document.getElementById('productos-tbody');
         const productos = getState().productos;
         const categorias = getState().categorias;
-        
+
         tbody.innerHTML = '';
-        
+
         productos.forEach(p => {
             const catNombre = categorias.find(c => c.id === p.categoriaId)?.nombre || p.categoriaId;
             const row = document.createElement('tr');
@@ -172,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Modal de Productos
     const prodModal = document.getElementById('producto-modal');
     const prodForm = document.getElementById('producto-form');
-    
+
     document.getElementById('btn-nuevo-producto').addEventListener('click', () => {
         document.getElementById('modal-titulo').innerText = 'Añadir Producto';
         prodForm.reset();
@@ -205,9 +205,9 @@ document.addEventListener('DOMContentLoaded', () => {
         prodModal.classList.remove('active');
     });
 
-    window.editarProducto = function(id) {
+    window.editarProducto = function (id) {
         const producto = getState().productos.find(p => p.id === id);
-        if(producto) {
+        if (producto) {
             document.getElementById('modal-titulo').innerText = 'Editar Producto';
             document.getElementById('prod-id').value = producto.id;
             document.getElementById('prod-nombre').value = producto.nombre;
@@ -216,41 +216,23 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('prod-categoria').value = producto.categoriaId;
             document.getElementById('prod-imagen').value = producto.imagen;
             document.getElementById('prod-disponible').checked = producto.disponible;
-            
+
             prodModal.classList.add('active');
         }
     };
 
-    window.eliminarProducto = async function(id) {
-        if(confirm('¿Estás seguro de que deseas eliminar este producto?')) {
+    window.eliminarProducto = async function (id) {
+        if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
             await deleteProducto(id);
         }
     };
 
-    // --- Login Logic ---
-    const loginOverlay = document.getElementById('login-overlay');
-    const loginForm = document.getElementById('login-form');
-    const loginError = document.getElementById('login-error');
-
-    loginForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const user = document.getElementById('login-user').value;
-        const pass = document.getElementById('login-pass').value;
-
-        // Credenciales por defecto
-        if (user === 'admin' && pass === 'dogguies2026') {
-            loginOverlay.classList.remove('active');
-            
-            // Inicializar listeners de Firebase (Se redibujará todo cuando llegue data) solo al loguearse
-            initDBListeners(() => {
-                loadStoreConfig();
-                renderCategorias();
-                renderProductos();
-                renderPedidos();
-            });
-        } else {
-            loginError.innerText = 'Usuario o contraseña incorrectos';
-        }
+    // Inicializar listeners de Firebase (Se redibujará todo cuando llegue data)
+    initDBListeners(() => {
+        loadStoreConfig();
+        renderCategorias();
+        renderProductos();
+        renderPedidos();
     });
 
 });
