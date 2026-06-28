@@ -227,12 +227,32 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Inicializar listeners de Firebase (Se redibujará todo cuando llegue data)
-    initDBListeners(() => {
-        loadStoreConfig();
-        renderCategorias();
-        renderProductos();
-        renderPedidos();
-    });
+    // --- Login Logic ---
+    const loginOverlay = document.getElementById('login-overlay');
+    const loginForm = document.getElementById('login-form');
+    const loginError = document.getElementById('login-error');
+
+    if(loginForm) {
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const user = document.getElementById('login-user').value;
+            const pass = document.getElementById('login-pass').value;
+
+            // Credenciales por defecto
+            if (user === 'admin' && pass === 'dogguies2026') {
+                loginOverlay.classList.remove('active');
+                
+                // Inicializar listeners de Firebase (Se redibujará todo cuando llegue data) solo al loguearse
+                initDBListeners(() => {
+                    loadStoreConfig();
+                    renderCategorias();
+                    renderProductos();
+                    renderPedidos();
+                });
+            } else {
+                loginError.innerText = 'Usuario o contraseña incorrectos';
+            }
+        });
+    }
 
 });
