@@ -1,3 +1,9 @@
+import { 
+    addProducto, updateProducto, deleteProducto, 
+    addCategoria, updateEstadoPedido, updateConfiguracion, 
+    getState, initDBListeners 
+} from './db.js';
+
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- Navegación entre secciones ---
@@ -19,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const storeStatusText = document.getElementById('store-status-text');
     
     function loadStoreConfig() {
-        const config = getConfiguracion();
+        const config = getState().configuracion;
         storeToggle.checked = config.abierto;
         updateStoreStatusText(config.abierto);
         
@@ -37,23 +43,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    storeToggle.addEventListener('change', (e) => {
+    storeToggle.addEventListener('change', async (e) => {
         const isOpen = e.target.checked;
         updateStoreStatusText(isOpen);
-        updateConfiguracion({ abierto: isOpen });
+        await updateConfiguracion({ abierto: isOpen });
     });
 
-    document.getElementById('config-form').addEventListener('submit', (e) => {
+    document.getElementById('config-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const apertura = document.getElementById('hora-apertura').value;
         const cierre = document.getElementById('hora-cierre').value;
-        updateConfiguracion({ horarioApertura: apertura, horarioCierre: cierre });
+        await updateConfiguracion({ horarioApertura: apertura, horarioCierre: cierre });
         alert('Horario actualizado con éxito');
     });
 
     // --- Gestión de Pedidos ---
     function renderPedidos() {
-        const pedidos = getPedidos();
+        const pedidos = getState().pedidos;
         const container = document.getElementById('pedidos-container');
         const badge = document.getElementById('badge-nuevos');
         
@@ -112,23 +118,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    window.cambiarEstadoPedido = function(id, estado) {
-        updateEstadoPedido(id, estado);
-        renderPedidos();
+    window.cambiarEstadoPedido = async function(id, estado) {
+        await updateEstadoPedido(id, estado);
     };
-
-    // Escuchar cambios desde index.html (Nuevos pedidos)
-    window.addEventListener('storage', (e) => {
-        if(e.key === DB_KEY) {
-            renderPedidos();
-        }
-    });
 
     // --- Gestión de Menú (Productos y Categorías) ---
     function renderCategorias() {
         const catList = document.getElementById('categorias-list');
         const selectProd = document.getElementById('prod-categoria');
-        const categorias = getCategorias();
+        const categorias = getState().categorias;
         
         catList.innerHTML = '';
         selectProd.innerHTML = '';
@@ -139,18 +137,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    document.getElementById('add-categoria-form').addEventListener('submit', (e) => {
+    document.getElementById('add-categoria-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const input = document.getElementById('nueva-categoria');
-        addCategoria(input.value);
+        await addCategoria(input.value);
         input.value = '';
-        renderCategorias();
     });
 
     function renderProductos() {
         const tbody = document.getElementById('productos-tbody');
-        const productos = getProductos();
-        const categorias = getCategorias();
+        const productos = getState().productos;
+        const categorias = getState().categorias;
         
         tbody.innerHTML = '';
         
@@ -187,7 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
         prodModal.classList.remove('active');
     });
 
-    prodForm.addEventListener('submit', (e) => {
+    prodForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const id = document.getElementById('prod-id').value;
         const producto = {
@@ -200,17 +197,16 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         if (id) {
-            updateProducto(id, producto);
+            await updateProducto(id, producto);
         } else {
-            addProducto(producto);
+            await addProducto(producto);
         }
 
         prodModal.classList.remove('active');
-        renderProductos();
     });
 
     window.editarProducto = function(id) {
-        const producto = getProductos().find(p => p.id === id);
+        const producto = getState().productos.find(p => p.id === id);
         if(producto) {
             document.getElementById('modal-titulo').innerText = 'Editar Producto';
             document.getElementById('prod-id').value = producto.id;
@@ -225,17 +221,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    window.eliminarProducto = function(id) {
+    window.eliminarProducto = async function(id) {
         if(confirm('¿Estás seguro de que deseas eliminar este producto?')) {
-            deleteProducto(id);
-            renderProductos();
+            await deleteProducto(id);
         }
     };
 
-    // Inicializar todo
-    loadStoreConfig();
-    renderCategorias();
-    renderProductos();
-    renderPedidos();
+    // Inicializar listeners de Firebase (Se redibujará todo cuando llegue data)
+    initDBListeners(() => {
+        loadStoreConfig();
+        renderCategorias();
+        renderProductos();
+        renderPedidos();
+    });
 
 });

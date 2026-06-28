@@ -1,3 +1,5 @@
+import { addPedido, getState, initDBListeners } from './db.js';
+
 document.addEventListener('DOMContentLoaded', () => {
     
     // Smooth scrolling to menu
@@ -38,8 +40,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const menuGrid = document.getElementById('menu-grid-container');
         if (!menuGrid) return; // If we are in admin page, this won't run
 
-        const config = getConfiguracion();
-        const productos = getProductos().filter(p => p.disponible);
+        const state = getState();
+        const config = state.configuracion;
+        const productos = state.productos.filter(p => p.disponible);
 
         menuGrid.innerHTML = '';
 
@@ -71,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     window.addToCart = function(id, name, price, image, btnElement) {
-        const config = getConfiguracion();
+        const config = getState().configuracion;
         if (!config.abierto) {
             alert('Lo sentimos, estamos cerrados por ahora.');
             return;
@@ -174,7 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnCheckout) {
         // Open Modal
         btnCheckout.addEventListener('click', () => {
-            const config = getConfiguracion();
+            const config = getState().configuracion;
             if (!config.abierto) {
                 alert('La tienda está cerrada, no puedes completar pedidos ahora.');
                 return;
@@ -224,10 +227,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Handle Form Submit
-        checkoutForm.addEventListener('submit', (e) => {
+        checkoutForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const config = getConfiguracion();
+            const config = getState().configuracion;
             if (!config.abierto) {
                 alert('Lo sentimos, estamos cerrados por ahora.');
                 return;
@@ -257,8 +260,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 pedido.referencia = document.getElementById('pm-referencia').value;
             }
             
-            // Añadir el pedido a la base de datos local
-            addPedido(pedido);
+            // Añadir el pedido a la base de datos de Firebase
+            await addPedido(pedido);
             
             alert(`¡Gracias por tu pedido, ${nombre}! Lo hemos recibido exitosamente y comenzaremos a prepararlo.`);
             
@@ -274,13 +277,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize Menu when on main page
     if (document.getElementById('menu-grid-container')) {
-        renderMenu();
-
-        // Listen for changes from admin (e.g., store closes, products change)
-        window.addEventListener('storage', (e) => {
-            if(e.key === 'los_dogguies_db') {
-                renderMenu(); // Redraw menu if something changes in admin
-            }
+        // Escuchar cambios desde Firebase y redibujar menú
+        initDBListeners(() => {
+            renderMenu();
         });
     }
 
