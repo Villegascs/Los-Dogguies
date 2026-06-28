@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Los Dogguies | Panel de Administración</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo-container">
+            <img src="assets/logo.png" alt="Los Dogguies Logo" class="logo">
+            <span class="admin-badge">ADMIN</span>
+        </div>
+        <nav class="nav-menu">
+            <button class="nav-item active" data-target="pedidos-section">
+                <span>📦 Pedidos</span>
+                <span id="badge-nuevos" class="badge">0</span>
+            </button>
+            <button class="nav-item" data-target="menu-section">
+                <span>🍔 Menú y Productos</span>
+            </button>
+            <button class="nav-item" data-target="config-section">
+                <span>⚙️ Configuración</span>
+            </button>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        
+        <!-- Pedidos Section -->
+        <section id="pedidos-section" class="content-section active">
+            <div class="header-section">
+                <h2>Pedidos Recientes</h2>
+                <div class="store-status">
+                    <span>Estado de la Tienda:</span>
+                    <label class="switch">
+                        <input type="checkbox" id="store-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                    <span id="store-status-text">Abierto</span>
+                </div>
+            </div>
+            
+            <div class="pedidos-grid" id="pedidos-container">
+                <!-- Se inyectarán los pedidos por JS -->
+            </div>
+        </section>
+
+        <!-- Menu Section -->
+        <section id="menu-section" class="content-section">
+            <div class="header-section">
+                <h2>Gestión del Menú</h2>
+                <button class="btn-primary" id="btn-nuevo-producto">+ Añadir Producto</button>
+            </div>
+            
+            <div class="menu-table-container">
+                <table class="menu-table">
+                    <thead>
+                        <tr>
+                            <th>Imagen</th>
+                            <th>Nombre</th>
+                            <th>Categoría</th>
+                            <th>Precio</th>
+                            <th>Disponible</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productos-tbody">
+                        <!-- Se inyectarán por JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Config Section -->
+        <section id="config-section" class="content-section">
+            <div class="header-section">
+                <h2>Configuración de la Tienda</h2>
+            </div>
+            
+            <div class="config-card">
+                <h3>Horarios de Atención</h3>
+                <form id="config-form">
+                    <div class="form-group row">
+                        <div>
+                            <label>Hora de Apertura</label>
+                            <input type="time" id="hora-apertura" required>
+                        </div>
+                        <div>
+                            <label>Hora de Cierre</label>
+                            <input type="time" id="hora-cierre" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary">Guardar Horario</button>
+                </form>
+            </div>
+
+            <div class="config-card" style="margin-top: 2rem;">
+                <h3>Gestión de Categorías</h3>
+                <div class="categorias-list" id="categorias-list">
+                    <!-- Se inyectarán por JS -->
+                </div>
+                <form id="add-categoria-form" class="row" style="margin-top: 1rem;">
+                    <input type="text" id="nueva-categoria" placeholder="Nueva Categoría (Ej. Bebidas)" required>
+                    <button type="submit" class="btn-secondary">Añadir</button>
+                </form>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal Nuevo/Editar Producto -->
+    <div class="modal-overlay" id="producto-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-titulo">Añadir Producto</h2>
+                <button class="close-modal" id="close-producto-modal">&times;</button>
+            </div>
+            <form id="producto-form">
+                <input type="hidden" id="prod-id">
+                <div class="form-group">
+                    <label>Nombre del Producto</label>
+                    <input type="text" id="prod-nombre" required>
+                </div>
+                <div class="form-group">
+                    <label>Descripción</label>
+                    <textarea id="prod-descripcion" rows="3" required></textarea>
+                </div>
+                <div class="form-group row">
+                    <div>
+                        <label>Precio ($)</label>
+                        <input type="number" id="prod-precio" step="0.01" required>
+                    </div>
+                    <div>
+                        <label>Categoría</label>
+                        <select id="prod-categoria" required>
+                            <!-- Inyectado por JS -->
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Ruta de la Imagen (o URL)</label>
+                    <input type="text" id="prod-imagen" placeholder="Ej. assets/classic.png" required>
+                </div>
+                <div class="form-group flex-row">
+                    <label>¿Está Disponible?</label>
+                    <input type="checkbox" id="prod-disponible" checked>
+                </div>
+                <button type="submit" class="btn-primary w-100">Guardar Producto</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Cargar base de datos primero, luego lógica del admin -->
+    <script src="db.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>
