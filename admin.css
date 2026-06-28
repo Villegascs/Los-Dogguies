@@ -425,3 +425,46 @@ input:checked + .slider:before {
     border-radius: 20px;
     font-size: 0.9rem;
 }
+
+/* Login Overlay */
+.login-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-color: var(--bg-dark);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: var(--transition);
+}
+
+.login-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.login-box {
+    background-color: var(--bg-card);
+    padding: 3rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.login-box h2 {
+    margin-bottom: 2rem;
+    text-align: center;
+    color: var(--secondary);
+}
+
+.error-msg {
+    color: var(--primary);
+    margin-top: 1rem;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: bold;
+}

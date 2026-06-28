@@ -11,6 +11,25 @@
 </head>
 <body>
     
+    <!-- Login Screen -->
+    <div id="login-overlay" class="login-overlay active">
+        <div class="login-box">
+            <h2>Acceso Administrador</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label>Usuario</label>
+                    <input type="text" id="login-user" required>
+                </div>
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="password" id="login-pass" required>
+                </div>
+                <button type="submit" class="btn-primary w-100">Ingresar</button>
+                <p id="login-error" class="error-msg"></p>
+            </form>
+        </div>
+    </div>
+    
     <!-- Sidebar -->
     <aside class="sidebar">
         <div class="logo-container">
