@@ -35,8 +35,25 @@ export async function deleteProducto(id) {
 }
 
 export async function addCategoria(nombre) {
-    const id = nombre.toLowerCase().replace(/\s+/g, '-');
-    await setDoc(doc(db, "categorias", id), { nombre });
+    try {
+        const timestamp = new Date().toISOString();
+        await addDoc(collection(db, "categorias"), {
+            nombre,
+            timestamp,
+            orden: Date.now() // Por defecto van al final
+        });
+    } catch (e) {
+        console.error("Error: ", e);
+    }
+}
+
+export async function updateCategoria(id, data) {
+    try {
+        const ref = doc(db, "categorias", id);
+        await updateDoc(ref, data);
+    } catch (e) {
+        console.error("Error: ", e);
+    }
 }
 
 export async function addPedido(pedido) {
@@ -74,7 +91,16 @@ export function initDBListeners(onUpdateCallback) {
 
     // Escuchar Categorías
     onSnapshot(collection(db, "categorias"), (snapshot) => {
-        state.categorias = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        state.categorias = [];
+        snapshot.forEach((doc) => {
+            state.categorias.push({ id: doc.id, ...doc.data() });
+        });
+        // Ordenar categorías
+        state.categorias.sort((a, b) => {
+            const orderA = a.orden !== undefined ? a.orden : (a.timestamp || '');
+            const orderB = b.orden !== undefined ? b.orden : (b.timestamp || '');
+            return orderA > orderB ? 1 : -1;
+        });
         onUpdateCallback();
     });
 

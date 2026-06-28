@@ -43,6 +43,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const state = getState();
         const config = state.configuracion;
         const productos = state.productos.filter(p => p.disponible);
+        const categorias = state.categorias;
+
+        // Ordenar productos según el orden de sus categorías
+        productos.sort((a, b) => {
+            const idxA = categorias.findIndex(c => c.id === a.categoriaId);
+            const idxB = categorias.findIndex(c => c.id === b.categoriaId);
+            return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB);
+        });
 
         menuGrid.innerHTML = '';
 

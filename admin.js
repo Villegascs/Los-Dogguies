@@ -1,6 +1,6 @@
 import {
     addProducto, updateProducto, deleteProducto,
-    addCategoria, updateEstadoPedido, updateConfiguracion,
+    addCategoria, updateCategoria, updateEstadoPedido, updateConfiguracion,
     getState, initDBListeners
 } from './db.js';
 
@@ -152,11 +152,48 @@ document.addEventListener('DOMContentLoaded', () => {
         catList.innerHTML = '';
         selectProd.innerHTML = '';
 
-        categorias.forEach(cat => {
-            catList.innerHTML += `<span class="cat-tag">${cat.nombre}</span>`;
+        categorias.forEach((cat, index) => {
+            catList.innerHTML += `
+                <div class="cat-tag-container">
+                    <span class="cat-tag">${cat.nombre}</span>
+                    <div class="cat-controls">
+                        ${index > 0 ? `<button onclick="moverCategoria('${cat.id}', -1)">↑</button>` : `<button disabled style="opacity:0.2">↑</button>`}
+                        ${index < categorias.length - 1 ? `<button onclick="moverCategoria('${cat.id}', 1)">↓</button>` : `<button disabled style="opacity:0.2">↓</button>`}
+                    </div>
+                </div>
+            `;
             selectProd.innerHTML += `<option value="${cat.id}">${cat.nombre}</option>`;
         });
     }
+
+    window.moverCategoria = async function (id, direction) {
+        const categorias = getState().categorias;
+        
+        // Asignar orden base si es la primera vez
+        let needsInit = categorias.some(c => c.orden === undefined);
+        if (needsInit) {
+             for(let i=0; i<categorias.length; i++) {
+                 categorias[i].orden = i * 10;
+                 await updateCategoria(categorias[i].id, { orden: i * 10 });
+             }
+        }
+        
+        const index = categorias.findIndex(c => c.id === id);
+        if (index < 0) return;
+        
+        const targetIndex = index + direction;
+        if (targetIndex < 0 || targetIndex >= categorias.length) return;
+        
+        const currentCat = categorias[index];
+        const targetCat = categorias[targetIndex];
+        
+        const currentOrden = currentCat.orden;
+        const targetOrden = targetCat.orden;
+        
+        // Intercambiamos el orden
+        await updateCategoria(currentCat.id, { orden: targetOrden });
+        await updateCategoria(targetCat.id, { orden: currentOrden });
+    };
 
     document.getElementById('add-categoria-form').addEventListener('submit', async (e) => {
         e.preventDefault();
