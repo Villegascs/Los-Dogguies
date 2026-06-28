@@ -152,48 +152,31 @@ document.addEventListener('DOMContentLoaded', () => {
         catList.innerHTML = '';
         selectProd.innerHTML = '';
 
-        categorias.forEach((cat, index) => {
+        categorias.forEach(cat => {
             catList.innerHTML += `
-                <div class="cat-tag-container">
-                    <span class="cat-tag">${cat.nombre}</span>
-                    <div class="cat-controls">
-                        ${index > 0 ? `<button onclick="moverCategoria('${cat.id}', -1)">↑</button>` : `<button disabled style="opacity:0.2">↑</button>`}
-                        ${index < categorias.length - 1 ? `<button onclick="moverCategoria('${cat.id}', 1)">↓</button>` : `<button disabled style="opacity:0.2">↓</button>`}
-                    </div>
+                <div class="cat-tag-container" data-id="${cat.id}">
+                    <span class="drag-handle" style="color: gray; font-size: 1.2rem; cursor: grab; padding-right: 0.5rem;" title="Arrastrar para ordenar">☰</span>
+                    <span class="cat-tag" style="padding:0;">${cat.nombre}</span>
                 </div>
             `;
             selectProd.innerHTML += `<option value="${cat.id}">${cat.nombre}</option>`;
         });
-    }
 
-    window.moverCategoria = async function (id, direction) {
-        const categorias = getState().categorias;
-        
-        // Asignar orden base si es la primera vez
-        let needsInit = categorias.some(c => c.orden === undefined);
-        if (needsInit) {
-             for(let i=0; i<categorias.length; i++) {
-                 categorias[i].orden = i * 10;
-                 await updateCategoria(categorias[i].id, { orden: i * 10 });
-             }
+        // Iniciar Drag and Drop si existe Sortable
+        if (typeof Sortable !== 'undefined') {
+            if (window.catSortable) window.catSortable.destroy();
+            window.catSortable = new Sortable(catList, {
+                animation: 150,
+                handle: '.drag-handle',
+                onEnd: async function (evt) {
+                    const newOrderIds = Array.from(catList.children).map(el => el.dataset.id);
+                    for(let i=0; i < newOrderIds.length; i++) {
+                        await updateCategoria(newOrderIds[i], { orden: i * 10 });
+                    }
+                }
+            });
         }
-        
-        const index = categorias.findIndex(c => c.id === id);
-        if (index < 0) return;
-        
-        const targetIndex = index + direction;
-        if (targetIndex < 0 || targetIndex >= categorias.length) return;
-        
-        const currentCat = categorias[index];
-        const targetCat = categorias[targetIndex];
-        
-        const currentOrden = currentCat.orden;
-        const targetOrden = targetCat.orden;
-        
-        // Intercambiamos el orden
-        await updateCategoria(currentCat.id, { orden: targetOrden });
-        await updateCategoria(targetCat.id, { orden: currentOrden });
-    };
+    }
 
     document.getElementById('add-categoria-form').addEventListener('submit', async (e) => {
         e.preventDefault();
