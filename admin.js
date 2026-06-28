@@ -6,6 +6,27 @@ import {
 
 document.addEventListener('DOMContentLoaded', () => {
 
+    // --- Generar Opciones de Horas ---
+    function generateTimeOptions() {
+        let options = '';
+        for (let i = 0; i < 24; i++) {
+            for (let j = 0; j < 60; j += 30) {
+                const hour24 = i.toString().padStart(2, '0');
+                const min = j.toString().padStart(2, '0');
+                const value = `${hour24}:${min}`;
+                
+                let hour12 = i % 12 || 12;
+                let ampm = i < 12 ? 'AM' : 'PM';
+                const label = `${hour12.toString().padStart(2, '0')}:${min} ${ampm}`;
+                
+                options += `<option value="${value}">${label}</option>`;
+            }
+        }
+        document.getElementById('hora-apertura').innerHTML = options;
+        document.getElementById('hora-cierre').innerHTML = options;
+    }
+    generateTimeOptions();
+
     // --- Navegación entre secciones ---
     const navItems = document.querySelectorAll('.nav-item');
     const sections = document.querySelectorAll('.content-section');
