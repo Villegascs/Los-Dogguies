@@ -225,6 +225,27 @@ document.addEventListener('DOMContentLoaded', () => {
         prodModal.classList.remove('active');
     });
 
+    // Añadir categoría inline desde el modal de productos
+    const btnAddCatInline = document.getElementById('btn-add-cat-inline');
+    if (btnAddCatInline) {
+        btnAddCatInline.addEventListener('click', async () => {
+            const nuevaCat = prompt('Nombre de la nueva categoría:');
+            if (nuevaCat && nuevaCat.trim() !== '') {
+                const nombre = nuevaCat.trim();
+                const newId = await addCategoria(nombre);
+                if (newId) {
+                    // Añadimos manualmente la opción para que se seleccione de inmediato
+                    const selectProd = document.getElementById('prod-categoria');
+                    const option = document.createElement('option');
+                    option.value = newId;
+                    option.textContent = nombre;
+                    selectProd.appendChild(option);
+                    selectProd.value = newId;
+                }
+            }
+        });
+    }
+
     prodForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 

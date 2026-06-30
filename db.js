@@ -45,13 +45,15 @@ export async function deleteProducto(id) {
 export async function addCategoria(nombre) {
     try {
         const timestamp = new Date().toISOString();
-        await addDoc(collection(db, "categorias"), {
+        const docRef = await addDoc(collection(db, "categorias"), {
             nombre,
             timestamp,
             orden: Date.now() // Por defecto van al final
         });
+        return docRef.id;
     } catch (e) {
         console.error("Error: ", e);
+        return null;
     }
 }
 
