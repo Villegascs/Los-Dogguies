@@ -12,6 +12,8 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+const storage = getStorage(app);
 
 // Estado local reactivo
 let state = {
@@ -21,7 +23,13 @@ let state = {
     pedidos: []
 };
 
-// ----------------- MÉTODOS DE ESCRITURA (FIREBASE) -----------------
+// ----------------- MÉTODOS DE ESCRITURA Y STORAGE -----------------
+export async function uploadImage(file) {
+    const storageRef = ref(storage, 'productos/' + Date.now() + '_' + file.name);
+    await uploadBytes(storageRef, file);
+    return await getDownloadURL(storageRef);
+}
+
 export async function addProducto(producto) {
     await addDoc(collection(db, "productos"), producto);
 }

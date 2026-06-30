@@ -52,6 +52,9 @@
             <button class="nav-item" data-target="config-section">
                 <span>⚙️ Configuración</span>
             </button>
+            <button class="nav-item btn-logout" id="btn-logout" style="margin-top: auto; background-color: #ff4d4d; color: white;">
+                <span>🚪 Cerrar Sesión</span>
+            </button>
         </nav>
     </aside>
 
@@ -170,8 +173,12 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Ruta de la Imagen (o URL)</label>
-                    <input type="text" id="prod-imagen" placeholder="Ej. assets/classic.png" required>
+                    <label>Subir Imagen</label>
+                    <input type="file" id="prod-imagen-file" accept="image/*">
+                </div>
+                <div class="form-group">
+                    <label>O Ruta de la Imagen (URL)</label>
+                    <input type="text" id="prod-imagen" placeholder="Ej. assets/classic.png">
                 </div>
                 <div class="form-group flex-row">
                     <label>¿Está Disponible?</label>

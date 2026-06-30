@@ -1,7 +1,7 @@
 import {
     addProducto, updateProducto, deleteProducto,
     addCategoria, updateCategoria, updateEstadoPedido, updateConfiguracion,
-    getState, initDBListeners
+    getState, initDBListeners, uploadImage
 } from './db.js';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -227,23 +227,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
     prodForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const id = document.getElementById('prod-id').value;
-        const producto = {
-            nombre: document.getElementById('prod-nombre').value,
-            descripcion: document.getElementById('prod-descripcion').value,
-            precio: parseFloat(document.getElementById('prod-precio').value),
-            categoriaId: document.getElementById('prod-categoria').value,
-            imagen: document.getElementById('prod-imagen').value,
-            disponible: document.getElementById('prod-disponible').checked
-        };
 
-        if (id) {
-            await updateProducto(id, producto);
-        } else {
-            await addProducto(producto);
+        const btnSubmit = prodForm.querySelector('button[type="submit"]');
+        const originalBtnText = btnSubmit.innerText;
+        btnSubmit.disabled = true;
+        btnSubmit.innerText = 'Guardando...';
+
+        try {
+            const id = document.getElementById('prod-id').value;
+            const fileInput = document.getElementById('prod-imagen-file');
+            let imagenUrl = document.getElementById('prod-imagen').value;
+
+            if (fileInput.files.length > 0) {
+                btnSubmit.innerText = 'Subiendo imagen...';
+                imagenUrl = await uploadImage(fileInput.files[0]);
+            }
+
+            if (!imagenUrl) {
+                alert("Debes proporcionar una imagen o subir un archivo");
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = originalBtnText;
+                return;
+            }
+
+            const producto = {
+                nombre: document.getElementById('prod-nombre').value,
+                descripcion: document.getElementById('prod-descripcion').value,
+                precio: parseFloat(document.getElementById('prod-precio').value),
+                categoriaId: document.getElementById('prod-categoria').value,
+                imagen: imagenUrl,
+                disponible: document.getElementById('prod-disponible').checked
+            };
+
+            if (id) {
+                await updateProducto(id, producto);
+            } else {
+                await addProducto(producto);
+            }
+
+            prodModal.classList.remove('active');
+        } catch (error) {
+            console.error("Error guardando producto:", error);
+            alert("Ocurrió un error al guardar el producto.");
+        } finally {
+            btnSubmit.disabled = false;
+            btnSubmit.innerText = originalBtnText;
         }
-
-        prodModal.classList.remove('active');
     });
 
     window.editarProducto = function (id) {
@@ -256,6 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('prod-precio').value = producto.precio;
             document.getElementById('prod-categoria').value = producto.categoriaId;
             document.getElementById('prod-imagen').value = producto.imagen;
+            document.getElementById('prod-imagen-file').value = '';
             document.getElementById('prod-disponible').checked = producto.disponible;
 
             prodModal.classList.add('active');
@@ -292,6 +322,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             } else {
                 loginError.innerText = 'Usuario o contraseña incorrectos';
+            }
+        });
+    }
+
+    // --- Logout Logic ---
+    const btnLogout = document.getElementById('btn-logout');
+    if (btnLogout) {
+        btnLogout.addEventListener('click', () => {
+            if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+                // Al recargar la página, se vuelve a mostrar el overlay de login
+                window.location.reload();
             }
         });
     }
